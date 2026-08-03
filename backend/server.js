@@ -4,11 +4,18 @@ import cors from "cors";
 
 import connectDB from "./config/db.js";
 
+// Routes
 import authRoutes from "./routes/authRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
+import passwordRoutes from "./routes/passwordRoutes.js";
+import googleAuthRoutes from "./routes/googleAuthRoutes.js";
 import disputeRoutes from "./routes/disputeRoutes.js";
 
 dotenv.config();
+
+// =============================
+// Database
+// =============================
 
 connectDB();
 
@@ -26,10 +33,15 @@ app.use(
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 // =============================
-// Routes
+// Health Check
 // =============================
 
 app.get("/", (req, res) => {
@@ -39,9 +51,17 @@ app.get("/", (req, res) => {
   });
 });
 
+// =============================
+// Routes
+// =============================
+
 app.use("/api/auth", authRoutes);
 
+app.use("/api/google", googleAuthRoutes);
+
 app.use("/api/otp", otpRoutes);
+
+app.use("/api/password", passwordRoutes);
 
 app.use("/api/disputes", disputeRoutes);
 
@@ -57,11 +77,13 @@ app.use("*", (req, res) => {
 });
 
 // =============================
-// Server
+// Start Server
 // =============================
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(
+    `🚀 ResolveHub Server running on Port ${PORT}`
+  );
 });
