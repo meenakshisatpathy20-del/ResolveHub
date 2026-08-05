@@ -5,27 +5,35 @@ import Navbar from "./Navbar";
 
 function DashboardLayout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="min-h-screen bg-slate-50">
 
-      {/* Sidebar */}
+      <div className="flex">
 
-      <Sidebar />
+        {/* Sidebar */}
 
-      {/* Main */}
+        <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+        {/* Main Content */}
 
-        {/* Top Navbar */}
+        <div className="flex min-h-screen flex-1 flex-col">
 
-        <Navbar />
+          {/* Header */}
 
-        {/* Page Content */}
+          <Navbar />
 
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-6 lg:p-8">
+          {/* Page */}
 
-          <Outlet />
+          <main className="flex-1 p-8">
 
-        </main>
+            <div className="mx-auto max-w-7xl">
+
+              <Outlet />
+
+            </div>
+
+          </main>
+
+        </div>
 
       </div>
 

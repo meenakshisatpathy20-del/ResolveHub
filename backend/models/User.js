@@ -22,34 +22,39 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    organizationName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    organizationType: {
-      type: String,
-      enum: [
-        "Customer",
-        "Bank",
-        "Merchant",
-        "Payment Gateway",
-        "E-commerce Platform",
-        "Logistics Partner",
-      ],
-      required: true,
-    },
-
     password: {
       type: String,
       required: true,
     },
 
+    // Customer | Employee | OrganizationAdmin | Admin
     role: {
       type: String,
-      enum: ["User", "Admin"],
-      default: "User",
+      enum: [
+        "Customer",
+        "Employee",
+        "OrganizationAdmin",
+        "Admin",
+      ],
+      default: "Customer",
+    },
+
+    // Bank | Merchant | Payment Gateway | Logistics
+    employeeRole: {
+      type: String,
+      enum: [
+        "Bank",
+        "Merchant",
+        "Payment Gateway",
+        "Logistics",
+      ],
+      default: null,
+    },
+
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      default: null,
     },
 
     emailVerified: {
@@ -64,7 +69,11 @@ const userSchema = new mongoose.Schema(
 
     accountStatus: {
       type: String,
-      enum: ["Active", "Inactive", "Suspended"],
+      enum: [
+        "Active",
+        "Inactive",
+        "Suspended",
+      ],
       default: "Active",
     },
 
@@ -75,6 +84,7 @@ const userSchema = new mongoose.Schema(
 
     lastLogin: {
       type: Date,
+      default: null,
     },
   },
   {
@@ -82,6 +92,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("User", userSchema);
-
-export default User;
+export default mongoose.model(
+  "User",
+  userSchema
+);

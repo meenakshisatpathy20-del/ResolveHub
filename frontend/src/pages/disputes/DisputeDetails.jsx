@@ -1,160 +1,169 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import API from "../../services/api";
+import {
+  ArrowLeft,
+  Clock3,
+  Download,
+  FileText,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function DisputeDetails() {
-  const { id } = useParams();
-
-  const [loading, setLoading] = useState(true);
-
-  const [dispute, setDispute] = useState(null);
-
-  useEffect(() => {
-    fetchDispute();
-  }, []);
-
-  const fetchDispute = async () => {
-    try {
-      const res = await API.get(`/disputes/${id}`);
-
-      setDispute(res.data.dispute);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="py-20 text-center">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!dispute) {
-    return (
-      <div className="py-20 text-center">
-        Dispute Not Found
-      </div>
-    );
-  }
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
 
       {/* Header */}
 
+      <div className="flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-slate-300 p-2 hover:bg-slate-100"
+          >
+            <ArrowLeft size={18} />
+          </button>
+
+          <div>
+
+            <h1 className="text-3xl font-semibold">
+              Dispute DSP-10231
+            </h1>
+
+            <p className="mt-1 text-slate-500">
+              Created on 05 Aug 2026
+            </p>
+
+          </div>
+
+        </div>
+
+        <span className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-medium text-yellow-700">
+          Under Review
+        </span>
+
+      </div>
+
+      {/* Transaction */}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
 
-        <h1 className="text-2xl font-bold">
+        <h2 className="mb-6 text-lg font-semibold">
+          Transaction Information
+        </h2>
 
-          {dispute.disputeId}
+        <div className="grid grid-cols-2 gap-6">
 
-        </h1>
+          <div>
 
-        <p className="mt-2 text-slate-500">
+            <p className="text-sm text-slate-500">
+              Transaction ID
+            </p>
 
-          {dispute.status}
+            <p className="font-medium">
+              TXN94838291
+            </p>
 
+          </div>
+
+          <div>
+
+            <p className="text-sm text-slate-500">
+              Order ID
+            </p>
+
+            <p className="font-medium">
+              ORD908123
+            </p>
+
+          </div>
+
+          <div>
+
+            <p className="text-sm text-slate-500">
+              Merchant
+            </p>
+
+            <p className="font-medium">
+              Amazon
+            </p>
+
+          </div>
+
+          <div>
+
+            <p className="text-sm text-slate-500">
+              Amount
+            </p>
+
+            <p className="font-medium">
+              ₹2,499
+            </p>
+
+          </div>
+
+          <div>
+
+            <p className="text-sm text-slate-500">
+              Payment Gateway
+            </p>
+
+            <p className="font-medium">
+              Razorpay
+            </p>
+
+          </div>
+
+          <div>
+
+            <p className="text-sm text-slate-500">
+              Bank
+            </p>
+
+            <p className="font-medium">
+              HDFC Bank
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Description */}
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+
+        <h2 className="mb-4 text-lg font-semibold">
+          Issue Description
+        </h2>
+
+        <p className="leading-7 text-slate-600">
+          Payment was deducted from my account but the
+          order was not confirmed. No refund has been
+          initiated yet.
         </p>
 
       </div>
 
-      {/* Details */}
+      {/* Evidence */}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6">
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="mb-5 text-lg font-semibold">
+          Supporting Evidence
+        </h2>
 
-          <h2 className="mb-5 text-lg font-semibold">
-            Transaction
-          </h2>
+        <button className="flex items-center gap-3 rounded-xl border border-slate-300 px-5 py-3 hover:bg-slate-100">
 
-          <div className="space-y-3">
+          <FileText size={18} />
 
-            <p>
-              <strong>Transaction ID:</strong>{" "}
-              {dispute.transactionId}
-            </p>
+          Payment_Screenshot.png
 
-            <p>
-              <strong>Order ID:</strong>{" "}
-              {dispute.orderId}
-            </p>
+          <Download size={16} />
 
-            <p>
-              <strong>Merchant:</strong>{" "}
-              {dispute.merchant}
-            </p>
-
-            <p>
-              <strong>Bank:</strong>{" "}
-              {dispute.bank}
-            </p>
-
-            <p>
-              <strong>Gateway:</strong>{" "}
-              {dispute.paymentGateway}
-            </p>
-
-            <p>
-              <strong>Amount:</strong> ₹
-              {dispute.amount}
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-
-          <h2 className="mb-5 text-lg font-semibold">
-            Dispute
-          </h2>
-
-          <div className="space-y-3">
-
-            <p>
-
-              <strong>Issue:</strong>{" "}
-
-              {dispute.issueType}
-
-            </p>
-
-            <p>
-
-              <strong>Priority:</strong>{" "}
-
-              {dispute.priority}
-
-            </p>
-
-            <p>
-
-              <strong>Next Action:</strong>{" "}
-
-              {dispute.nextActionBy}
-
-            </p>
-
-            <p>
-
-              <strong>Description</strong>
-
-            </p>
-
-            <div className="rounded-xl bg-slate-50 p-4">
-
-              {dispute.description}
-
-            </div>
-
-          </div>
-
-        </div>
+        </button>
 
       </div>
 
@@ -163,93 +172,75 @@ function DisputeDetails() {
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
 
         <h2 className="mb-6 text-lg font-semibold">
-          Timeline
+          Dispute Timeline
         </h2>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
 
-          {dispute.timeline.map((item, index) => (
+          <div className="flex gap-4">
 
-            <div
-              key={index}
-              className="flex gap-4"
-            >
+            <Clock3
+              size={18}
+              className="mt-1 text-blue-600"
+            />
 
-              <div className="mt-2 h-3 w-3 rounded-full bg-blue-600"></div>
+            <div>
 
-              <div>
+              <h3 className="font-medium">
+                Dispute Raised
+              </h3>
 
-                <h3 className="font-medium">
-
-                  {item.action}
-
-                </h3>
-
-                <p className="text-sm text-slate-500">
-
-                  {item.performedBy}
-
-                </p>
-
-                <p className="text-xs text-slate-400">
-
-                  {new Date(
-                    item.timestamp
-                  ).toLocaleString()}
-
-                </p>
-
-              </div>
+              <p className="text-sm text-slate-500">
+                05 Aug 2026 • 10:15 AM
+              </p>
 
             </div>
 
-          ))}
+          </div>
 
-        </div>
+          <div className="flex gap-4">
 
-      </div>
+            <Clock3
+              size={18}
+              className="mt-1 text-blue-600"
+            />
 
-      {/* Evidence */}
+            <div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h3 className="font-medium">
+                Assigned to Merchant
+              </h3>
 
-        <h2 className="mb-6 text-lg font-semibold">
+              <p className="text-sm text-slate-500">
+                05 Aug 2026 • 11:02 AM
+              </p>
 
-          Evidence
-
-        </h2>
-
-        {dispute.evidence.length === 0 ? (
-
-          <p className="text-slate-500">
-
-            No evidence uploaded.
-
-          </p>
-
-        ) : (
-
-          <div className="space-y-3">
-
-            {dispute.evidence.map((file) => (
-
-              <a
-                key={file.fileUrl}
-                href={file.fileUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block rounded-lg border border-slate-200 p-3 hover:bg-slate-50"
-              >
-
-                {file.fileName}
-
-              </a>
-
-            ))}
+            </div>
 
           </div>
 
-        )}
+          <div className="flex gap-4">
+
+            <Clock3
+              size={18}
+              className="mt-1 text-blue-600"
+            />
+
+            <div>
+
+              <h3 className="font-medium">
+                Under Review
+              </h3>
+
+              <p className="text-sm text-slate-500">
+                Current Status
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 

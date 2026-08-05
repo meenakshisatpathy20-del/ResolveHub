@@ -1,179 +1,127 @@
-import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
-  PlusCircle,
-  FolderKanban,
-  Building2,
-  Bell,
+  FileText,
   BarChart3,
-  User,
+  Bell,
   Settings,
-  Bot,
-  ShieldCheck,
+  LifeBuoy,
   LogOut,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    path: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Raise Dispute",
-    path: "/dashboard/raise-dispute",
-    icon: PlusCircle,
-  },
-  {
-    title: "My Disputes",
-    path: "/dashboard/disputes",
-    icon: FolderKanban,
-  },
-  {
-    title: "Organizations",
-    path: "/dashboard/organizations",
-    icon: Building2,
-  },
-  {
-    title: "Reports",
-    path: "/dashboard/reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Notifications",
-    path: "/dashboard/notifications",
-    icon: Bell,
-  },
-  {
-    title: "AI Assistant",
-    path: "/dashboard/ai-assistant",
-    icon: Bot,
-  },
-  {
-    title: "Profile",
-    path: "/dashboard/profile",
-    icon: User,
-  },
-  {
-    title: "Settings",
-    path: "/dashboard/settings",
-    icon: Settings,
-  },
-];
+import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 function Sidebar() {
-  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  const { logout } = useAuth();
+
+  const menus = [
+    {
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/dashboard",
+    },
+    {
+      title: "My Disputes",
+      icon: FileText,
+      path: "/dashboard/disputes",
+    },
+    {
+      title: "Reports",
+      icon: BarChart3,
+      path: "/dashboard/reports",
+    },
+    {
+      title: "Notifications",
+      icon: Bell,
+      path: "/dashboard/notifications",
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      path: "/dashboard/settings",
+    },
+    {
+      title: "Support",
+      icon: LifeBuoy,
+      path: "/dashboard/support",
+    },
+  ];
 
   return (
-    <aside className="hidden lg:flex h-screen w-72 flex-col border-r border-slate-200 bg-white shadow-sm">
-
+    <aside
+      className={`sticky top-0 flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300 ${
+        collapsed ? "w-20" : "w-64"
+      }`}
+    >
       {/* Logo */}
 
-      <div className="border-b border-slate-200 px-6 py-6">
+      <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5">
 
-        <div className="flex items-center justify-between">
+        {!collapsed && (
+          <div>
 
-          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-blue-600">
+              ResolveHub
+            </h1>
 
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-xl font-bold text-white">
-              R
-            </div>
-
-            <div>
-
-              <h1 className="text-xl font-bold tracking-tight">
-                ResolveHub
-              </h1>
-
-              <p className="text-xs text-slate-500">
-                Unified Dispute Resolution
-              </p>
-
-            </div>
+            <p className="text-xs text-slate-500">
+              Enterprise Platform
+            </p>
 
           </div>
+        )}
 
-          <button className="rounded-lg p-2 transition hover:bg-slate-100">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="rounded-lg p-2 hover:bg-slate-100"
+        >
+          {collapsed ? (
+            <ChevronRight size={18} />
+          ) : (
             <ChevronLeft size={18} />
-          </button>
-
-        </div>
-
+          )}
+        </button>
       </div>
 
       {/* Navigation */}
 
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <nav className="mt-6 flex-1 px-3">
 
-        <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-          Workspace
-        </p>
+        {menus.map((menu) => (
+          <NavLink
+            key={menu.title}
+            to={menu.path}
+            className={({ isActive }) =>
+              `mb-2 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+                isActive
+                  ? "bg-blue-50 text-blue-700"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`
+            }
+          >
+            <menu.icon size={20} />
 
-        {menuItems.map((item) => {
-          const Icon = item.icon;
+            {!collapsed && menu.title}
+          </NavLink>
+        ))}
+      </nav>
 
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `mb-2 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`
-              }
-            >
-              <Icon size={19} />
+      {/* Logout */}
 
-              {item.title}
-            </NavLink>
-          );
-        })}
-
-      </div>
-
-      {/* Bottom User */}
-
-      <div className="border-t border-slate-200 p-5">
-
-        <div className="mb-5 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
-            JD
-          </div>
-
-          <div className="flex-1">
-
-            <h3 className="font-semibold">
-              John Doe
-            </h3>
-
-            <p className="flex items-center gap-1 text-xs text-slate-500">
-
-              <ShieldCheck size={14} />
-
-              Bank Officer
-
-            </p>
-
-          </div>
-
-        </div>
+      <div className="border-t border-slate-200 p-3">
 
         <button
           onClick={logout}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 py-3 font-medium text-red-600 transition hover:bg-red-50"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
         >
-          <LogOut size={18} />
+          <LogOut size={20} />
 
-          Logout
+          {!collapsed && "Logout"}
         </button>
 
       </div>

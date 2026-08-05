@@ -1,6 +1,9 @@
 import express from "express";
 
-import protect from "../middleware/authMiddleware.js";
+import protect, {
+  authorize,
+} from "../middleware/authMiddleware.js";
+
 import upload from "../middleware/uploadMiddleware.js";
 
 import {
@@ -11,18 +14,28 @@ import {
   addTimelineEntry,
   deleteDispute,
   getDashboardSummary,
+  assignDispute,
+  getOrganizationDisputes,
+  getAllDisputes,
 } from "../controllers/disputeController.js";
 
 const router = express.Router();
 
+// =======================================
 // Dashboard
+// =======================================
+
 router.get(
   "/dashboard-summary",
   protect,
   getDashboardSummary
 );
 
-// Disputes
+// =======================================
+// Customer
+// =======================================
+
+// Raise Dispute
 router.post(
   "/",
   protect,
@@ -30,34 +43,87 @@ router.post(
   createDispute
 );
 
+// My Disputes
 router.get(
   "/",
   protect,
   getMyDisputes
 );
 
+// Single Dispute
 router.get(
   "/:id",
   protect,
   getDisputeById
 );
 
-router.put(
-  "/:id/status",
-  protect,
-  updateDisputeStatus
-);
-
-router.post(
-  "/:id/timeline",
-  protect,
-  addTimelineEntry
-);
-
+// Delete
 router.delete(
   "/:id",
   protect,
   deleteDispute
+);
+
+// =======================================
+// Organization
+// =======================================
+
+// Assigned Cases
+router.get(
+  "/organization/all",
+  protect,
+  authorize(
+    "OrganizationAdmin",
+    "Employee"
+  ),
+  getOrganizationDisputes
+);
+
+// Assign Employee
+router.put(
+  "/:id/assign",
+  protect,
+  authorize(
+    "OrganizationAdmin",
+    "Admin"
+  ),
+  assignDispute
+);
+
+// Update Status
+router.put(
+  "/:id/status",
+  protect,
+  authorize(
+    "OrganizationAdmin",
+    "Employee",
+    "Admin"
+  ),
+  updateDisputeStatus
+);
+
+// Timeline
+router.post(
+  "/:id/timeline",
+  protect,
+  authorize(
+    "OrganizationAdmin",
+    "Employee",
+    "Admin"
+  ),
+  addTimelineEntry
+);
+
+// =======================================
+// Admin
+// =======================================
+
+// View All Disputes
+router.get(
+  "/admin/all",
+  protect,
+  authorize("Admin"),
+  getAllDisputes
 );
 
 export default router;

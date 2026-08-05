@@ -1,16 +1,15 @@
 import Dispute from "../models/Dispute.js";
+import Notification from "../models/Notification.js";
 
-// ===============================
+// =======================================
 // Create Dispute
-// ===============================
+// =======================================
 
 export const createDispute = async (req, res) => {
   try {
     const dispute = await Dispute.create({
       ...req.body,
-
       customer: req.user._id,
-
       timeline: [
         {
           action: "Dispute Raised",
@@ -19,27 +18,32 @@ export const createDispute = async (req, res) => {
       ],
     });
 
-    return res.status(201).json({
+    // Create Notification
+    await Notification.create({
+      receiver: req.user._id,
+      title: "Dispute Created",
+      message: `Your dispute ${dispute.disputeId} has been created successfully.`,
+      dispute: dispute._id,
+    });
+
+    res.status(201).json({
       success: true,
       message: "Dispute created successfully.",
       dispute,
     });
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-// ===============================
-// Get Logged In User Disputes
-// ===============================
+// =======================================
+// Get My Disputes
+// =======================================
 
-export const getMyDisputes = async (
-  req,
-  res
-) => {
+export const getMyDisputes = async (req, res) => {
   try {
     const disputes = await Dispute.find({
       customer: req.user._id,
@@ -59,18 +63,15 @@ export const getMyDisputes = async (
   }
 };
 
-// ===============================
+// =======================================
 // Get Single Dispute
-// ===============================
+// =======================================
 
-export const getDisputeById = async (
-  req,
-  res
-) => {
+export const getDisputeById = async (req, res) => {
   try {
-    const dispute = await Dispute.findById(
-      req.params.id
-    );
+    const dispute = await Dispute.findById(req.params.id)
+      .populate("customer", "-password")
+      .populate("assignedTo", "-password");
 
     if (!dispute) {
       return res.status(404).json({
@@ -91,158 +92,283 @@ export const getDisputeById = async (
   }
 };
 
-// ===============================
+// =======================================
 // Update Status
-// ===============================
+// =======================================
 
-export const updateDisputeStatus =
-  async (req, res) => {
-    try {
-      const { status } = req.body;
+export const updateDisputeStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
 
-      const dispute =
-        await Dispute.findById(req.params.id);
+    const dispute = await Dispute.findById(req.params.id);
 
-      if (!dispute) {
-        return res.status(404).json({
-          success: false,
-          message: "Dispute not found.",
-        });
-      }
-
-      dispute.status = status;
-
-      dispute.timeline.push({
-        action: `Status changed to ${status}`,
-        performedBy: req.user.fullName,
-      });
-
-      await dispute.save();
-
-      res.status(200).json({
-        success: true,
-        dispute,
-      });
-    } catch (error) {
-      res.status(500).json({
+    if (!dispute) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
+        message: "Dispute not found.",
       });
     }
-  };
 
-// ===============================
-// Add Comment
-// ===============================
+    dispute.status = status;
 
-export const addTimelineEntry =
-  async (req, res) => {
-    try {
-      const { action } = req.body;
+    dispute.timeline.push({
+      action: `Status changed to ${status}`,
+      performedBy: req.user.fullName,
+    });
 
-      const dispute =
-        await Dispute.findById(req.params.id);
+    await dispute.save();
 
-      if (!dispute) {
-        return res.status(404).json({
-          success: false,
-          message: "Dispute not found.",
-        });
-      }
+    // Notify Customer
+    await Notification.create({
+      receiver: dispute.customer,
+      title: "Dispute Status Updated",
+      message: `Your dispute ${dispute.disputeId} is now ${status}.`,
+      dispute: dispute._id,
+    });
 
-      dispute.timeline.push({
-        action,
-        performedBy: req.user.fullName,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Status updated successfully.",
+      dispute,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
-      await dispute.save();
+// =======================================
+// Add Timeline Entry
+// =======================================
 
-      res.status(200).json({
-        success: true,
-        dispute,
-      });
-    } catch (error) {
-      res.status(500).json({
+export const addTimelineEntry = async (req, res) => {
+  try {
+    const { action } = req.body;
+
+    const dispute = await Dispute.findById(req.params.id);
+
+    if (!dispute) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
+        message: "Dispute not found.",
       });
     }
-  };
 
-// ===============================
+    dispute.timeline.push({
+      action,
+      performedBy: req.user.fullName,
+    });
+
+    await dispute.save();
+
+    res.status(200).json({
+      success: true,
+      dispute,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =======================================
 // Delete Dispute
-// ===============================
+// =======================================
 
-export const deleteDispute =
-  async (req, res) => {
-    try {
-      const dispute =
-        await Dispute.findById(req.params.id);
+export const deleteDispute = async (req, res) => {
+  try {
+    const dispute = await Dispute.findById(req.params.id);
 
-      if (!dispute) {
-        return res.status(404).json({
-          success: false,
-          message: "Dispute not found.",
-        });
-      }
-
-      await dispute.deleteOne();
-
-      res.status(200).json({
-        success: true,
-        message: "Dispute deleted.",
-      });
-    } catch (error) {
-      res.status(500).json({
+    if (!dispute) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
+        message: "Dispute not found.",
       });
     }
-  };
 
-// ===============================
+    await dispute.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Dispute deleted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =======================================
 // Dashboard Summary
-// ===============================
+// =======================================
 
-export const getDashboardSummary =
-  async (req, res) => {
-    try {
-      const total =
-        await Dispute.countDocuments({
-          customer: req.user._id,
-        });
+export const getDashboardSummary = async (req, res) => {
+  try {
+    const filter =
+      req.user.organizationType === "Customer"
+        ? { customer: req.user._id }
+        : { assignedTo: req.user._id };
 
-      const open =
-        await Dispute.countDocuments({
-          customer: req.user._id,
-          status: "Open",
-        });
+    const [
+      total,
+      open,
+      resolved,
+      highPriority,
+      recentDisputes,
+    ] = await Promise.all([
+      Dispute.countDocuments(filter),
 
-      const resolved =
-        await Dispute.countDocuments({
-          customer: req.user._id,
-          status: "Resolved",
-        });
+      Dispute.countDocuments({
+        ...filter,
+        status: "Open",
+      }),
 
-      const highPriority =
-        await Dispute.countDocuments({
-          customer: req.user._id,
-          priority: "High",
-        });
+      Dispute.countDocuments({
+        ...filter,
+        status: "Resolved",
+      }),
 
-      res.status(200).json({
-        success: true,
-        summary: {
-          total,
-          open,
-          resolved,
-          highPriority,
-        },
-      });
-    } catch (error) {
-      res.status(500).json({
+      Dispute.countDocuments({
+        ...filter,
+        priority: "High",
+      }),
+
+      Dispute.find(filter)
+        .sort({ updatedAt: -1 })
+        .limit(5),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      summary: {
+        total,
+        open,
+        resolved,
+        highPriority,
+      },
+      recentDisputes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// =======================================
+// Assign Dispute
+// =======================================
+
+export const assignDispute = async (req, res) => {
+  try {
+    const { employeeId } = req.body;
+
+    const dispute = await Dispute.findById(req.params.id);
+
+    if (!dispute) {
+      return res.status(404).json({
         success: false,
-        message: error.message,
+        message: "Dispute not found.",
       });
     }
-  };
+
+    dispute.assignedTo = employeeId;
+
+    dispute.timeline.push({
+      action: "Dispute Assigned",
+      performedBy: req.user.fullName,
+    });
+
+    await dispute.save();
+
+    await Notification.create({
+      receiver: employeeId,
+      title: "New Dispute Assigned",
+      message: `You have been assigned dispute ${dispute.disputeId}.`,
+      dispute: dispute._id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Dispute assigned successfully.",
+      dispute,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// =======================================
+// Organization Disputes
+// =======================================
+
+export const getOrganizationDisputes = async (
+  req,
+  res
+) => {
+  try {
+    const disputes = await Dispute.find({
+      assignedTo: req.user._id,
+    })
+      .populate(
+        "customer",
+        "fullName email organizationName"
+      )
+      .sort({
+        updatedAt: -1,
+      });
+
+    res.status(200).json({
+      success: true,
+      count: disputes.length,
+      disputes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// =======================================
+// Get All Disputes
+// =======================================
+
+export const getAllDisputes = async (
+  req,
+  res
+) => {
+  try {
+    const disputes = await Dispute.find()
+      .populate(
+        "customer",
+        "fullName email organizationName organizationType"
+      )
+      .populate(
+        "assignedTo",
+        "fullName email organizationName"
+      )
+      .sort({
+        updatedAt: -1,
+      });
+
+    res.status(200).json({
+      success: true,
+      count: disputes.length,
+      disputes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

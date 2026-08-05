@@ -10,8 +10,14 @@ import ResetPassword from "./pages/auth/ResetPassword";
 // Layout
 import DashboardLayout from "./components/layout/DashboardLayout";
 
-// Dashboard
+// Customer Dashboard
 import Dashboard from "./pages/dashboard/Dashboard";
+
+// Organization Dashboard
+import OrganizationDashboard from "./pages/dashboard/OrganizationDashboard";
+
+// Admin Dashboard
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
 
 // Disputes
 import Disputes from "./pages/disputes/Disputes";
@@ -23,30 +29,47 @@ import Organizations from "./pages/organizations/Organizations";
 import Reports from "./pages/reports/Reports";
 import Notifications from "./pages/notifications/Notifications";
 import Settings from "./pages/settings/Settings";
+import Support from "./pages/support/Support";
 
 // Protected Route
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Auth
+import { useAuth } from "./context/AuthContext";
+
+function DashboardRouter() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
+  if (user.role === "Admin") {
+    return <AdminDashboard />;
+  }
+
+  if (
+    user.role === "OrganizationAdmin" ||
+    user.role === "Employee"
+  ) {
+    return <OrganizationDashboard />;
+  }
+
+  return <Dashboard />;
+}
 
 function App() {
   return (
     <Routes>
 
-      {/* ================= Public Routes ================= */}
+      {/* Public */}
 
       <Route
         path="/"
         element={<Navigate to="/login" replace />}
       />
 
-      <Route
-        path="/login"
-        element={<Login />}
-      />
+      <Route path="/login" element={<Login />} />
 
-      <Route
-        path="/signup"
-        element={<Signup />}
-      />
+      <Route path="/signup" element={<Signup />} />
 
       <Route
         path="/forgot-password"
@@ -63,7 +86,7 @@ function App() {
         element={<ResetPassword />}
       />
 
-      {/* ================= Protected Routes ================= */}
+      {/* Protected */}
 
       <Route
         path="/dashboard"
@@ -75,7 +98,7 @@ function App() {
       >
         <Route
           index
-          element={<Dashboard />}
+          element={<DashboardRouter />}
         />
 
         <Route
@@ -113,9 +136,11 @@ function App() {
           element={<Settings />}
         />
 
+        <Route
+          path="support"
+          element={<Support />}
+        />
       </Route>
-
-      {/* ================= 404 ================= */}
 
       <Route
         path="*"

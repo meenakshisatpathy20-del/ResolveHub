@@ -1,114 +1,106 @@
-import {
-  Search,
-  Bell,
-  Plus,
-  Menu,
-  ChevronDown,
-  CalendarDays,
-} from "lucide-react";
+import { Bell, ChevronDown, Phone } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useState, useEffect } from "react";
 
 function Navbar() {
+  const { user, logout } = useAuth();
+
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-6 backdrop-blur">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
 
       {/* Left */}
 
-      <div className="flex items-center gap-4">
+      <div>
 
-        <button className="rounded-lg p-2 transition hover:bg-slate-100 lg:hidden">
-          <Menu size={20} />
-        </button>
+        <h1 className="text-xl font-semibold text-slate-900">
+          Dashboard
+        </h1>
 
-        <div>
-
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-            ResolveHub
-          </p>
-
-          <h1 className="text-lg font-semibold text-slate-900">
-            Dashboard
-          </h1>
-
-        </div>
-
-      </div>
-
-      {/* Center */}
-
-      <div className="hidden w-full max-w-xl lg:block">
-
-        <div className="relative">
-
-          <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-
-          <input
-            type="text"
-            placeholder="Search disputes, organizations, users..."
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white"
-          />
-
-        </div>
+        <p className="text-sm text-slate-500">
+          ResolveHub Enterprise
+        </p>
 
       </div>
 
       {/* Right */}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-6">
+
+        {/* Contact */}
+
+        <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-100">
+
+          <Phone size={16} />
+
+          Contact Support
+
+        </button>
 
         {/* Date */}
 
-        <div className="hidden items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 xl:flex">
+        <div className="text-right">
 
-          <CalendarDays size={16} />
+          <p className="text-sm font-medium text-slate-900">
 
-          {new Date().toLocaleDateString()}
+            {time.toLocaleDateString()}
+
+          </p>
+
+          <p className="text-xs text-slate-500">
+
+            {time.toLocaleTimeString()}
+
+          </p>
 
         </div>
 
-        {/* New Dispute */}
+        {/* Notification */}
 
-        <button className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700">
+        <button className="relative rounded-xl border border-slate-200 p-2 hover:bg-slate-100">
 
-          <Plus size={18} />
+          <Bell size={20} />
 
-          New Dispute
-
-        </button>
-
-        {/* Notifications */}
-
-        <button className="relative rounded-xl border border-slate-200 p-3 transition hover:bg-slate-100">
-
-          <Bell size={19} />
-
-          <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-500"></span>
+          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500"></span>
 
         </button>
 
-        {/* User */}
+        {/* Profile */}
 
-        <button className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 transition hover:bg-slate-100">
+        <button className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-100">
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
-            JD
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-semibold">
+
+            {user?.fullName?.charAt(0)}
+
           </div>
 
-          <div className="hidden text-left lg:block">
+          <div className="text-left">
 
-            <h3 className="text-sm font-semibold">
-              John Doe
-            </h3>
+            <p className="text-sm font-semibold">
+
+              {user?.fullName}
+
+            </p>
 
             <p className="text-xs text-slate-500">
-              Bank Officer
+
+              {user?.role}
+
             </p>
 
           </div>
 
-          <ChevronDown size={16} />
+          <ChevronDown size={18} />
 
         </button>
 

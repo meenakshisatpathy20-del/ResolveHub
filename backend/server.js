@@ -10,6 +10,9 @@ import otpRoutes from "./routes/otpRoutes.js";
 import passwordRoutes from "./routes/passwordRoutes.js";
 import googleAuthRoutes from "./routes/googleAuthRoutes.js";
 import disputeRoutes from "./routes/disputeRoutes.js";
+import organizationRoutes from "./routes/organizationRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import organizationRoutes from "./routes/organizationRoutes.js";
 
 dotenv.config();
 
@@ -75,7 +78,18 @@ app.use("*", (req, res) => {
     message: "Route Not Found",
   });
 });
-
+app.use(
+  "/api/organizations",
+  organizationRoutes
+);
+app.use(
+  "/api/notifications",
+  notificationRoutes
+);
+app.use(
+  "/api/organizations",
+  organizationRoutes
+);
 // =============================
 // Start Server
 // =============================
