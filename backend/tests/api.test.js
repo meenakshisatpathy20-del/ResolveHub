@@ -166,6 +166,8 @@ test("dispute workflow and role permissions", { skip: !MONGO_URI }, async () => 
     check("resolve requires remarks", (await req("PUT",`/disputes/${d._id}/status`,shopAgent.token,{status:"Resolved"})).status === 400);
     r = await req("PUT",`/disputes/${d._id}/status`,shopAgent.token,{status:"Resolved",remarks:"Refund processed, UTR 123"});
     check("employee resolves", r.status === 200 && r.data.dispute.resolvedAt);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    check("customer emailed on status change", /\[DEV EMAIL\] To: customer@resolvehub\.example \| Update on your dispute/.test(serverOutput), serverOutput.slice(-500));
     check("closed dispute locked for org", (await req("PUT",`/disputes/${d._id}/status`,shopAdmin.token,{status:"Open"})).status === 400);
 
     // Notifications

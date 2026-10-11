@@ -21,6 +21,7 @@ import {
   userOrgId,
 } from "../utils/disputeAccess.js";
 import { notifyUsers, getOrgAdmins } from "../utils/notify.js";
+import sendEmail from "../utils/sendEmail.js";
 import {
   filesToEvidence,
   UPLOAD_DIR,
@@ -48,6 +49,41 @@ const populateDispute = (query) =>
     .populate("paymentGateway", "organizationName organizationType")
     .populate("assignedOrganization", "organizationName organizationType")
     .populate("assignedEmployee", "fullName email");
+
+const escapeHtml = (text = "") =>
+  String(text).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[c]);
+
+// Email the customer about a status change. Runs in the background:
+// a mail failure is logged and never blocks the status update.
+const emailStatusChange = async (dispute, status, remarks) => {
+  try {
+    const customer = await User.findById(dispute.customer).select("fullName email");
+    if (!customer?.email) return;
+
+    const link = `${(process.env.CLIENT_URL || "").split(",")[0].trim()}/dashboard/disputes/${dispute._id}`;
+
+    await sendEmail(
+      customer.email,
+      `Update on your dispute ${dispute.disputeId}: ${status}`,
+      `<div style="font-family:Arial,sans-serif;padding:20px;max-width:560px">
+        <h2 style="color:#2563eb;margin:0 0 12px">ResolveHub</h2>
+        <p>Hi ${escapeHtml(customer.fullName)},</p>
+        <p>Your dispute <strong>${dispute.disputeId}</strong> is now <strong>${escapeHtml(status)}</strong>.</p>
+        ${remarks ? `<p style="background:#f1f5f9;padding:12px;border-radius:8px">${escapeHtml(remarks)}</p>` : ""}
+        <p><a href="${link}" style="color:#2563eb">View your dispute</a></p>
+        <p style="color:#64748b;font-size:12px">ResolveHub will never ask for your OTP, PIN or CVV.</p>
+      </div>`
+    );
+  } catch (error) {
+    console.error("Status email failed:", error.message);
+  }
+};
 
 const timelineEntry = (user, action, extra = {}) => ({
   action,
@@ -390,6 +426,10 @@ export const updateDisputeStatus = async (req, res) => {
       },
       { exclude: req.user._id }
     );
+
+    if (status !== previous) {
+      emailStatusChange(dispute, status, remarks?.trim());
+    }
 
     res.status(200).json({
       success: true,

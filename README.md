@@ -29,7 +29,7 @@ A customer raises a dispute about a failed, duplicate or unrefunded payment and 
 
 **Everyone**
 - Role-specific dashboards built from live data
-- Notifications with an unread badge, mark as read / read all, and links back to the dispute
+- Notifications with an unread badge, mark as read / read all, and links back to the dispute; customers are also emailed when their dispute's status changes
 - Reports: monthly trend, breakdown by status and issue type, resolution rate, average resolution time, CSV export and print/PDF, all limited to the data the user is allowed to see
 - Profile editing and password change
 - Responsive layout that works on mobile
@@ -177,14 +177,9 @@ docker compose exec backend npm run seed
 
 The app runs at http://localhost:8080. Nginx serves the React build and proxies `/api` to the backend. MongoDB data and uploaded evidence persist in named volumes.
 
-## Deploying (e.g. AWS)
+## Deploying to AWS
 
-Not yet deployed. Checklist:
-- Use MongoDB Atlas or another managed database, and set `NODE_ENV=production`
-- Set `CLIENT_URL` to your HTTPS frontend domain and build the frontend with `VITE_API_URL` pointing at the API
-- Configure Cloudinary (or mount persistent storage) so evidence survives redeploys
-- Use `/api/health` for load balancer health checks
-- Keep secrets in the platform's secret store, never in the repository
+Step-by-step guide: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. It covers MongoDB Atlas, the backend on Elastic Beanstalk (Docker), the frontend on Amplify Hosting with an `/api` proxy, Cloudinary storage, environment variables and an end-to-end checklist.
 
 ## Screenshots
 

@@ -21,9 +21,14 @@ import reportRoutes from "./routes/reportRoutes.js";
 
 const app = express();
 
-// Behind a load balancer / reverse proxy in production
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
+// Number of reverse proxies in front of the app (load balancer, CDN…),
+// so rate limiting sees the real client IP. See docs/DEPLOYMENT.md.
+const trustProxy = Number(
+  process.env.TRUST_PROXY ?? (process.env.NODE_ENV === "production" ? 1 : 0)
+);
+
+if (trustProxy > 0) {
+  app.set("trust proxy", trustProxy);
 }
 
 // =============================
