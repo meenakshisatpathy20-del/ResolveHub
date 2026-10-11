@@ -4,7 +4,7 @@ A role-based **payment dispute management platform** built with the MERN stack (
 
 A customer raises a dispute about a failed, duplicate or unrefunded payment and attaches evidence. The merchant, bank and payment gateway involved review the case, assign it to an employee, update its status and talk to the customer, all in one shared workflow with notifications and a full audit timeline.
 
-![Dispute details](docs/screenshots/dispute-details.png)
+![Dispute details](docs/screenshots/orgadmin-dispute.png)
 
 ## Features
 
@@ -183,10 +183,35 @@ Step-by-step guide: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. It covers Mong
 
 ## Screenshots
 
-| Customer dashboard | Raise a dispute |
+### Sign in
+| Login | Sign up with email OTP |
 |---|---|
-| ![](docs/screenshots/customer-dashboard.png) | ![](docs/screenshots/raise-dispute.png) |
-| **Organizations (admin)** | **Reports** |
-| ![](docs/screenshots/organizations.png) | ![](docs/screenshots/reports.png) |
-| **Login** | **Mobile** |
-| ![](docs/screenshots/login.png) | ![](docs/screenshots/mobile.png) |
+| ![Login](docs/screenshots/login.png) | ![Sign up](docs/screenshots/signup.png) |
+
+### Customer
+| Dashboard | Raise a dispute |
+|---|---|
+| ![Customer dashboard](docs/screenshots/customer-dashboard.png) | ![Raise a dispute](docs/screenshots/raise-dispute.png) |
+| **My disputes** | **Dispute details & conversation** |
+| ![My disputes](docs/screenshots/customer-disputes.png) | ![Customer dispute details](docs/screenshots/customer-dispute-details.png) |
+| **Notifications** | **Settings** |
+| ![Notifications](docs/screenshots/notifications.png) | ![Settings](docs/screenshots/settings.png) |
+
+### Organization admin & employee
+| Org admin dashboard | Assigning a case |
+|---|---|
+| ![Org admin dashboard](docs/screenshots/orgadmin-dashboard.png) | ![Org admin dispute](docs/screenshots/orgadmin-dispute.png) |
+| **Team management** | **Employee resolves the case** |
+| ![Team](docs/screenshots/team.png) | ![Employee resolved](docs/screenshots/employee-resolved.png) |
+
+### Platform admin
+| Admin dashboard | Organizations |
+|---|---|
+| ![Admin dashboard](docs/screenshots/admin-dashboard.png) | ![Organizations](docs/screenshots/organizations.png) |
+| **Reports & analytics** | |
+| ![Reports](docs/screenshots/reports.png) | |
+
+### Mobile
+| Dashboard | Menu | Dispute details |
+|---|---|---|
+| ![Mobile dashboard](docs/screenshots/mobile-dashboard.png) | ![Mobile menu](docs/screenshots/mobile-menu.png) | ![Mobile dispute](docs/screenshots/mobile-dispute.png) |
