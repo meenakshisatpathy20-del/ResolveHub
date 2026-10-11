@@ -1,19 +1,13 @@
 {
-  "dependencies": {
-    "@hookform/resolvers": "^5.7.1",
-    "@react-oauth/google": "^0.13.5",
-    "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/react-table": "^9.0.0",
-    "cloudinary": "^1.41.3",
-    "framer-motion": "^12.43.0",
-    "multer": "^2.2.0",
-    "multer-storage-cloudinary": "^4.0.0",
-    "nodemailer": "^9.0.3",
-    "react-hook-form": "^7.84.0",
-    "react-router-dom": "^7.18.1",
-    "recharts": "^3.10.1",
-    "sonner": "^2.0.7",
-    "tailwindcss": "^4.3.3",
-    "zod": "^4.4.3"
+  "name": "resolvehub",
+  "private": true,
+  "description": "MERN payment dispute management platform",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "seed": "npm run seed --prefix backend",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend"
   }
 }
