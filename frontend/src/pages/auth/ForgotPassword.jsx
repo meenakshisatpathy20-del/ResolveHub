@@ -1,94 +1,54 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../../services/api";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+
+import AuthLayout from "./AuthLayout";
+import { Spinner } from "../../components/common/States";
+import API, { errorMessage } from "../../services/api";
 
 function ForgotPassword() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  const handleSendOTP = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      await API.post(
-        "/password/send-reset-otp",
-        {
-          email,
-        }
-      );
-
-      localStorage.setItem(
-        "resetEmail",
-        email
-      );
-
-      alert("OTP sent successfully.");
-
+      const res = await API.post("/password/send-reset-otp", { email });
+      sessionStorage.setItem("resetEmail", email.trim().toLowerCase());
+      toast.success(res.data.message);
       navigate("/verify-reset-otp");
-
-    } catch (err) {
-
-      alert(
-        err.response?.data?.message ||
-          "Unable to send OTP."
-      );
-
+    } catch (error) {
+      toast.error(errorMessage(error, "Unable to send the code."));
     } finally {
-
       setLoading(false);
-
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-
-        <h1 className="mb-2 text-3xl font-bold">
-          Forgot Password
-        </h1>
-
-        <p className="mb-6 text-slate-500">
-          Enter your registered email.
-        </p>
-
-        <form
-          onSubmit={handleSendOTP}
-          className="space-y-5"
-        >
-
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) =>
-              setEmail(e.target.value)
-            }
-            className="h-12 w-full rounded-xl border border-slate-300 px-4"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-12 w-full rounded-xl bg-blue-600 font-semibold text-white"
-          >
-            {loading
-              ? "Sending OTP..."
-              : "Send OTP"}
-          </button>
-
-        </form>
-
-      </div>
-
-    </div>
+    <AuthLayout
+      title="Forgot your password?"
+      subtitle="Enter your registered email and we'll send you a 6-digit reset code."
+      footer={
+        <Link to="/login" className="inline-flex items-center gap-1.5 font-semibold text-blue-600 hover:underline">
+          <ArrowLeft className="h-4 w-4" /> Back to login
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="label">Email address</label>
+          <input id="email" type="email" className="input" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
+        </div>
+        <button type="submit" className="btn-primary h-11 w-full" disabled={loading || !email}>
+          {loading && <Spinner className="h-4 w-4" />}
+          {loading ? "Sending code…" : "Send reset code"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }
 

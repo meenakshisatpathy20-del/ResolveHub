@@ -1,91 +1,81 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../../services/api";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+import AuthLayout from "./AuthLayout";
+import { Spinner } from "../../components/common/States";
+import API, { errorMessage } from "../../services/api";
 
 function VerifyResetOTP() {
   const navigate = useNavigate();
-
-  const email = localStorage.getItem("resetEmail");
-
-  const [otp, setOTP] = useState("");
-
+  const email = sessionStorage.getItem("resetEmail");
+  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
 
-  const verifyOTP = async (e) => {
+  if (!email) return <Navigate to="/forgot-password" replace />;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      await API.post("/password/verify-reset-otp", {
-        email,
-        otp,
-      });
-
-      localStorage.setItem("resetOTP", otp);
-
-      alert("OTP Verified");
-
+      await API.post("/password/verify-reset-otp", { email, otp });
+      sessionStorage.setItem("resetOTP", otp);
       navigate("/reset-password");
-
-    } catch (err) {
-
-      alert(
-        err.response?.data?.message ||
-          "Invalid OTP"
-      );
-
+    } catch (error) {
+      toast.error(errorMessage(error, "Invalid code."));
     } finally {
-
       setLoading(false);
+    }
+  };
 
+  const resend = async () => {
+    setResending(true);
+    try {
+      await API.post("/password/send-reset-otp", { email });
+      toast.success("A new code has been sent.");
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setResending(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100">
-
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-
-        <h1 className="text-3xl font-bold">
-          Verify OTP
-        </h1>
-
-        <p className="mt-2 mb-6 text-slate-500">
-          Enter the OTP sent to your email.
-        </p>
-
-        <form
-          onSubmit={verifyOTP}
-          className="space-y-5"
-        >
-
+    <AuthLayout
+      title="Check your email"
+      subtitle={`Enter the 6-digit code sent to ${email}. It expires in 5 minutes.`}
+      footer={
+        <>
+          Wrong email?{" "}
+          <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">Change it</Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="otp" className="label">Reset code</label>
           <input
-            type="text"
-            placeholder="Enter OTP"
+            id="otp"
+            inputMode="numeric"
+            maxLength={6}
+            className="input text-center text-lg tracking-[0.5em]"
+            placeholder="••••••"
             value={otp}
-            onChange={(e) =>
-              setOTP(e.target.value)
-            }
-            className="h-12 w-full rounded-xl border border-slate-300 px-4"
-            required
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+            autoFocus
           />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="h-12 w-full rounded-xl bg-blue-600 font-semibold text-white"
-          >
-            {loading
-              ? "Verifying..."
-              : "Verify OTP"}
-          </button>
-
-        </form>
-
-      </div>
-
-    </div>
+        </div>
+        <button type="submit" className="btn-primary h-11 w-full" disabled={loading || otp.length !== 6}>
+          {loading && <Spinner className="h-4 w-4" />}
+          Verify code
+        </button>
+        <button type="button" onClick={resend} disabled={resending} className="btn-ghost w-full">
+          {resending ? "Sending…" : "Didn't get it? Resend code"}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }
 

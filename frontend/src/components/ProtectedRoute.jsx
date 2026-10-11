@@ -1,19 +1,24 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+
 import { useAuth } from "../context/AuthContext";
+import { PageLoader } from "./common/States";
 
-const ProtectedRoute = ({ children }) => {
+// roles: optional list of roles allowed to see the page
+const ProtectedRoute = ({ children, roles }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-    const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
 
-    if (loading) {
-        return <h2>Loading...</h2>;
-    }
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
 
-    if (!user) {
-        return <Navigate to="/login" replace />;
-    }
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-    return children;
+  return children;
 };
 
 export default ProtectedRoute;

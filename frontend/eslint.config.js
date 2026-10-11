@@ -17,5 +17,10 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Pages load their data in an effect (setting loading/error state).
+      // This is the intended pattern here, so the rule is turned off.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])
