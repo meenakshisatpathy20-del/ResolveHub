@@ -5,6 +5,7 @@ import {
   loginUser,
   getProfile,
   updateProfile,
+  changePassword,
 } from "../controllers/authController.js";
 
 import protect from "../middleware/authMiddleware.js";
@@ -39,6 +40,12 @@ router.put(
   "/profile",
   protect,
   updateProfile
+);
+
+router.put(
+  "/change-password",
+  protect,
+  changePassword
 );
 
 export default router;

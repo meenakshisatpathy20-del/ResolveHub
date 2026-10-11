@@ -1,59 +1,50 @@
 import express from "express";
 
-import protect, {
-  authorize,
-} from "../middleware/authMiddleware.js";
+import protect, { authorize } from "../middleware/authMiddleware.js";
 
 import {
   createOrganization,
+  updateOrganization,
   getOrganizations,
   getOrganizationById,
-  assignEmployee,
+  getMembers,
+  addMember,
+  updateMemberStatus,
   deleteOrganization,
 } from "../controllers/organizationController.js";
 
 const router = express.Router();
 
-// =======================================
-// Admin Only
-// =======================================
+router.use(protect);
 
-// Create Organization
-router.post(
-  "/",
-  protect,
-  authorize("Admin"),
-  createOrganization
-);
+// List (all logged-in users; admins get extra details)
+router.get("/", getOrganizations);
 
-// Get All Organizations
+router.post("/", authorize("Admin"), createOrganization);
+
+router.get("/:id", getOrganizationById);
+
+router.put("/:id", authorize("Admin"), updateOrganization);
+
+router.delete("/:id", authorize("Admin"), deleteOrganization);
+
+// Members (Admin, or OrganizationAdmin of that organization)
 router.get(
-  "/",
-  protect,
-  getOrganizations
-);
-
-// Get Single Organization
-router.get(
-  "/:id",
-  protect,
-  getOrganizationById
-);
-
-// Assign Employee
-router.put(
-  "/:id/assign",
-  protect,
+  "/:id/members",
   authorize("Admin", "OrganizationAdmin"),
-  assignEmployee
+  getMembers
 );
 
-// Delete Organization
-router.delete(
-  "/:id",
-  protect,
-  authorize("Admin"),
-  deleteOrganization
+router.post(
+  "/:id/members",
+  authorize("Admin", "OrganizationAdmin"),
+  addMember
+);
+
+router.put(
+  "/:id/members/:userId/status",
+  authorize("Admin", "OrganizationAdmin"),
+  updateMemberStatus
 );
 
 export default router;

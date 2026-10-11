@@ -15,16 +15,25 @@ export const sendResetOTP = async (
   res
 ) => {
   try {
-    const { email } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required.",
+      });
+    }
 
     const user = await User.findOne({
       email,
     });
 
+    // Same response whether or not the account exists,
+    // so this endpoint can't be used to discover registered emails.
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
+      return res.status(200).json({
+        success: true,
+        message: "If this email is registered, an OTP has been sent.",
       });
     }
 
@@ -50,12 +59,17 @@ export const sendResetOTP = async (
     await sendEmail(
       email,
       "ResolveHub Password Reset",
-      `Your password reset OTP is ${otp}. It expires in 5 minutes.`
+      `<div style="font-family:Arial,sans-serif;padding:20px">
+        <h2 style="color:#2563eb;">ResolveHub password reset</h2>
+        <p>Your password reset OTP is:</p>
+        <h1 style="letter-spacing:5px;">${otp}</h1>
+        <p>It expires in <strong>5 minutes</strong>. If you didn't request this, ignore this email.</p>
+      </div>`
     );
 
     res.status(200).json({
       success: true,
-      message: "OTP Sent Successfully",
+      message: "If this email is registered, an OTP has been sent.",
     });
 
   } catch (error) {
@@ -79,7 +93,8 @@ export const verifyResetOTP = async (
 
   try {
 
-    const { email, otp } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const otp = req.body.otp?.toString().trim();
 
     const record = await OTP.findOne({
       email,
@@ -131,11 +146,9 @@ export const resetPassword = async (
 
   try {
 
-    const {
-      email,
-      otp,
-      newPassword,
-    } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const otp = req.body.otp?.toString().trim();
+    const { newPassword } = req.body;
 
     const record = await OTP.findOne({
       email,
@@ -148,6 +161,20 @@ export const resetPassword = async (
       return res.status(400).json({
         success: false,
         message: "OTP Verification Required",
+      });
+    }
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters.",
+      });
+    }
+
+    if (record.expiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP Expired",
       });
     }
 

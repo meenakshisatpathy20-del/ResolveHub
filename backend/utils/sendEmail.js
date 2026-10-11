@@ -9,6 +9,17 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async (to, subject, html) => {
+  // Local development without email credentials:
+  // print the message to the console instead of failing.
+  if (
+    (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) &&
+    process.env.NODE_ENV !== "production"
+  ) {
+    const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    console.log(`📧 [DEV EMAIL] To: ${to} | ${subject} | ${text}`);
+    return;
+  }
+
   try {
     await transporter.sendMail({
       from: `"ResolveHub" <${process.env.EMAIL_USER}>`,

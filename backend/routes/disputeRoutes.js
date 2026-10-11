@@ -1,10 +1,7 @@
 import express from "express";
 
-import protect, {
-  authorize,
-} from "../middleware/authMiddleware.js";
-
-import upload from "../middleware/uploadMiddleware.js";
+import protect, { authorize } from "../middleware/authMiddleware.js";
+import { uploadEvidence } from "../middleware/uploadMiddleware.js";
 
 import {
   createDispute,
@@ -12,118 +9,89 @@ import {
   getDisputeById,
   updateDisputeStatus,
   addTimelineEntry,
+  addComment,
+  addEvidence,
+  downloadEvidence,
   deleteDispute,
   getDashboardSummary,
   assignDispute,
+  getAssignableEmployees,
   getOrganizationDisputes,
   getAllDisputes,
 } from "../controllers/disputeController.js";
 
 const router = express.Router();
 
+// Every dispute route requires login.
+// Per-dispute permissions are checked inside the controller.
+router.use(protect);
+
 // =======================================
 // Dashboard
 // =======================================
 
-router.get(
-  "/dashboard-summary",
-  protect,
-  getDashboardSummary
-);
+router.get("/dashboard-summary", getDashboardSummary);
 
 // =======================================
-// Customer
+// Lists (role-scoped)
 // =======================================
 
-// Raise Dispute
-router.post(
-  "/",
-  protect,
-  upload.array("evidence", 5),
-  createDispute
-);
+router.get("/", getMyDisputes);
 
-// My Disputes
-router.get(
-  "/",
-  protect,
-  getMyDisputes
-);
-
-// Single Dispute
-router.get(
-  "/:id",
-  protect,
-  getDisputeById
-);
-
-// Delete
-router.delete(
-  "/:id",
-  protect,
-  deleteDispute
-);
-
-// =======================================
-// Organization
-// =======================================
-
-// Assigned Cases
 router.get(
   "/organization/all",
-  protect,
-  authorize(
-    "OrganizationAdmin",
-    "Employee"
-  ),
+  authorize("OrganizationAdmin", "Employee"),
   getOrganizationDisputes
 );
 
-// Assign Employee
+router.get("/admin/all", authorize("Admin"), getAllDisputes);
+
+// =======================================
+// Create
+// =======================================
+
+router.post("/", authorize("Customer"), uploadEvidence, createDispute);
+
+// =======================================
+// Single dispute
+// =======================================
+
+router.get("/:id", getDisputeById);
+
+router.delete("/:id", deleteDispute);
+
+router.post("/:id/comments", addComment);
+
+router.post("/:id/evidence", uploadEvidence, addEvidence);
+
+router.get("/:id/evidence/:evidenceId", downloadEvidence);
+
+// =======================================
+// Organization / Admin actions
+// =======================================
+
+router.get(
+  "/:id/assignable-employees",
+  authorize("OrganizationAdmin", "Admin"),
+  getAssignableEmployees
+);
+
 router.put(
   "/:id/assign",
-  protect,
-  authorize(
-    "OrganizationAdmin",
-    "Admin"
-  ),
+  authorize("OrganizationAdmin", "Admin"),
   assignDispute
 );
 
-// Update Status
 router.put(
   "/:id/status",
-  protect,
-  authorize(
-    "OrganizationAdmin",
-    "Employee",
-    "Admin"
-  ),
+  authorize("OrganizationAdmin", "Employee", "Admin"),
   updateDisputeStatus
 );
 
-// Timeline
 router.post(
   "/:id/timeline",
-  protect,
-  authorize(
-    "OrganizationAdmin",
-    "Employee",
-    "Admin"
-  ),
+  authorize("OrganizationAdmin", "Employee", "Admin"),
   addTimelineEntry
-);
-
-// =======================================
-// Admin
-// =======================================
-
-// View All Disputes
-router.get(
-  "/admin/all",
-  protect,
-  authorize("Admin"),
-  getAllDisputes
 );
 
 export default router;

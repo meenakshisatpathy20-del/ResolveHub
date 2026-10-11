@@ -24,6 +24,8 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       enum: [
         "Dispute",
+        "Assignment",
+        "Comment",
         "Organization",
         "System",
       ],
@@ -45,6 +47,8 @@ const notificationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+notificationSchema.index({ receiver: 1, createdAt: -1 });
 
 export default mongoose.model(
   "Notification",

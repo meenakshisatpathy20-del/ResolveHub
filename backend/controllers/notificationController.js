@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Notification from "../models/Notification.js";
 
 // =======================================
@@ -10,13 +11,40 @@ export const getNotifications = async (req, res) => {
       receiver: req.user._id,
     })
       .sort({ createdAt: -1 })
+      .limit(100)
       .populate("dispute", "disputeId status");
+
+    const unread = await Notification.countDocuments({
+      receiver: req.user._id,
+      isRead: false,
+    });
 
     res.status(200).json({
       success: true,
       count: notifications.length,
+      unread,
       notifications,
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =======================================
+// Unread Count
+// =======================================
+
+export const getUnreadCount = async (req, res) => {
+  try {
+    const unread = await Notification.countDocuments({
+      receiver: req.user._id,
+      isRead: false,
+    });
+
+    res.status(200).json({ success: true, unread });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -31,9 +59,9 @@ export const getNotifications = async (req, res) => {
 
 export const markAsRead = async (req, res) => {
   try {
-    const notification = await Notification.findById(
-      req.params.id
-    );
+    const notification = mongoose.Types.ObjectId.isValid(req.params.id)
+      ? await Notification.findById(req.params.id)
+      : null;
 
     if (!notification) {
       return res.status(404).json({
@@ -106,9 +134,9 @@ export const deleteNotification = async (
   res
 ) => {
   try {
-    const notification = await Notification.findById(
-      req.params.id
-    );
+    const notification = mongoose.Types.ObjectId.isValid(req.params.id)
+      ? await Notification.findById(req.params.id)
+      : null;
 
     if (!notification) {
       return res.status(404).json({

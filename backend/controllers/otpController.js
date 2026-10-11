@@ -1,4 +1,5 @@
 import OTP from "../models/OTP.js";
+import User from "../models/User.js";
 import generateOTP from "../utils/generateOTP.js";
 import sendEmail from "../utils/sendEmail.js";
 
@@ -10,12 +11,19 @@ const OTP_EXPIRY =
 // ======================
 export const sendEmailOTP = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
 
     if (!email) {
       return res.status(400).json({
         success: false,
         message: "Email is required.",
+      });
+    }
+
+    if (await User.exists({ email })) {
+      return res.status(400).json({
+        success: false,
+        message: "An account with this email already exists. Please log in.",
       });
     }
 
@@ -83,7 +91,8 @@ export const sendEmailOTP = async (req, res) => {
 // ======================
 export const verifyEmailOTP = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const otp = req.body.otp?.toString().trim();
 
     if (!email || !otp) {
       return res.status(400).json({
