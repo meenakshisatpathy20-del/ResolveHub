@@ -1,4 +1,47 @@
-# Deploying ResolveHub on AWS
+# Deploying ResolveHub
+
+Two options:
+
+- **[Option A: Vercel + Render (free, simplest)](#option-a-vercel--render)**
+- **[Option B: AWS (Elastic Beanstalk + Amplify)](#option-b-aws)**
+
+Both use MongoDB Atlas for the database and Cloudinary for evidence files.
+
+---
+
+## Option A: Vercel + Render
+
+| Part | Service |
+|---|---|
+| Frontend | Vercel (root directory `frontend`, includes `vercel.json` for page routing) |
+| Backend | Render web service (root directory `backend`) |
+
+**Backend on Render**
+
+1. render.com → **New → Web Service** → connect the GitHub repo.
+2. Root directory: `backend` · Runtime: **Node** · Build command: `npm install` · Start command: `npm start`.
+3. Instance type: **Free**. Health check path: `/api/health`.
+4. Environment variables: everything from your `backend/.env`, plus `NODE_ENV=production` and `TRUST_PROXY=1`.
+   Cloudinary keys are **required**, because Render's disk is wiped on every deploy.
+5. Deploy, then open `https://<your-service>.onrender.com/api/health`.
+
+**Frontend on Vercel**
+
+1. vercel.com → **Add New → Project** → import the repo.
+2. Root directory: `frontend` (Vite is detected automatically).
+3. Environment variables: `VITE_API_URL=https://<your-service>.onrender.com/api`, `VITE_GOOGLE_CLIENT_ID`, `VITE_SUPPORT_EMAIL`.
+4. Deploy, then copy the Vercel URL.
+
+**Connect them**
+
+- On Render, set `CLIENT_URL` to the Vercel URL (no trailing slash) and redeploy.
+- In Google Cloud Console, add the Vercel URL to the OAuth client's **Authorized JavaScript origins**.
+
+Free Render services sleep after about 15 minutes without traffic; the first request after that takes 30–50 seconds.
+
+---
+
+## Option B: AWS
 
 | Part | Service |
 |---|---|
