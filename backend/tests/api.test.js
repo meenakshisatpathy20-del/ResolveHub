@@ -30,6 +30,7 @@ const env = {
   CLOUDINARY_API_SECRET: "",
   REQUIRE_EMAIL_VERIFICATION: "true",
   SEED_PASSWORD: "Demo@1234",
+  SEED_SAMPLE_DATA: "false",
 };
 
 before(async () => {
@@ -208,7 +209,14 @@ test("dispute workflow and role permissions", { skip: !MONGO_URI }, async () => 
     check("change password wrong current", r.status===400);
     r = await req("PUT","/auth/change-password",cust2,{currentPassword:"Password1!",newPassword:"NewPass123"});
     check("change password", r.status===200);
-    check("invalid token 401", (await req("GET","/auth/profile","bad")).status===401);
+    // Shared demo accounts can't be locked
+    check("demo account password locked", (await req("PUT","/auth/change-password",cust.token,{currentPassword:"Demo@1234",newPassword:"Hacked1234"})).status===403);
+    check("demo member can't be deactivated", (await req("PUT",`/organizations/${shop}/members/${shopAgent.user._id}/status`,admin,{accountStatus:"Inactive"})).status===403);
+    check("demo org can't be deactivated", (await req("PUT",`/organizations/${shop}`,admin,{isActive:false})).status===403);
+    check("demo org can't be renamed", (await req("PUT",`/organizations/${shop}`,admin,{organizationName:"Hacked"})).status===403);
+    check("demo org can still be edited", (await req("PUT",`/organizations/${shop}`,admin,{organizationName:"ShopKart",phone:"1800-000-000"})).status===200);
+    check("demo login still works", (await req("POST","/auth/login",null,{email:"customer@resolvehub.example",password:"Demo@1234"})).status===200);
+        check("invalid token 401", (await req("GET","/auth/profile","bad")).status===401);
     check("404 json", (await req("GET","/nope")).status===404);
 
     // Customer withdraw

@@ -7,6 +7,7 @@ import User from "../models/User.js";
 import Dispute from "../models/Dispute.js";
 import { notifyUsers } from "../utils/notify.js";
 import serializeUser from "../utils/serializeUser.js";
+import { isDemoAccount, DEMO_LOCKED_MESSAGE } from "../utils/demoAccounts.js";
 
 const ORG_TYPES = [
   "Bank",
@@ -104,6 +105,19 @@ export const updateOrganization = async (req, res) => {
     const error = validateOrg(data, true);
 
     if (error) return fail(res, 400, error);
+
+    // Demo organizations must stay active and keep their names,
+    // so the shared demo keeps working for every visitor.
+    if (
+      (data.isActive === false || "organizationName" in data) &&
+      (await User.exists({ organization: req.params.id, email: /\.example$/i }))
+    ) {
+      const current = await Organization.findById(req.params.id).select("organizationName");
+
+      if (data.isActive === false || data.organizationName !== current?.organizationName) {
+        return fail(res, 403, "Demo organizations can't be renamed or deactivated.");
+      }
+    }
 
     const organization = await Organization.findByIdAndUpdate(
       req.params.id,
@@ -351,6 +365,10 @@ export const updateMemberStatus = async (req, res) => {
     const member = await User.findOne({ _id: userId, organization: id });
 
     if (!member) return fail(res, 404, "Member not found.");
+
+    if (isDemoAccount(member.email)) {
+      return fail(res, 403, DEMO_LOCKED_MESSAGE);
+    }
 
     if (!isAdmin && member.role !== "Employee") {
       return fail(res, 403, "Only an administrator can manage organization admins.");

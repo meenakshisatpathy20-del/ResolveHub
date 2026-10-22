@@ -4,6 +4,22 @@ A role-based **payment dispute management platform** built with the MERN stack (
 
 A customer raises a dispute about a failed, duplicate or unrefunded payment and attaches evidence. The merchant, bank and payment gateway involved review the case, assign it to an employee, update its status and talk to the customer, all in one shared workflow with notifications and a full audit timeline.
 
+## 🚀 Live demo
+
+**https://resolve-hub-gold.vercel.app**
+
+Open the login page and click one of the **"Try the live demo"** buttons. There's no sign-up, and each role sees a different view of the app:
+
+| Button | Logs in as | What to try |
+|---|---|---|
+| Customer | Demo Customer | Track the sample disputes, raise a new one with a screenshot attached |
+| Org Admin | ShopKart admin | See every ShopKart case, assign the open one to an employee |
+| Employee | ShopKart agent | Update a case's status, reply to the customer |
+| Platform Admin | Admin | Manage organizations, view platform-wide reports |
+
+> The free backend sleeps when idle, so the first click can take up to a minute.
+> Demo account passwords can't be changed, so the demo keeps working for everyone.
+
 ![Dispute details](docs/screenshots/orgadmin-dispute.png)
 
 ## Features
@@ -102,7 +118,9 @@ npm run dev               # http://localhost:5173
 
 ### Demo accounts (after `npm run seed`)
 
-All demo accounts use the password `Demo@1234` (change it with `SEED_PASSWORD`).
+`npm run seed` creates these accounts plus 5 sample disputes for the demo customer (skip them with `SEED_SAMPLE_DATA=false`).
+All demo accounts use the password `Demo@1234` (change it with `SEED_PASSWORD`, and set the same value as `VITE_DEMO_PASSWORD` in the frontend).
+The login page shows one-click buttons for them; hide the buttons by building the frontend with `VITE_DEMO_MODE=false`.
 
 | Role | Email |
 |---|---|

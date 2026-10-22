@@ -5,6 +5,7 @@ import OTP from "../models/OTP.js";
 
 import generateOTP from "../utils/generateOTP.js";
 import sendEmail from "../utils/sendEmail.js";
+import { isDemoAccount, DEMO_LOCKED_MESSAGE } from "../utils/demoAccounts.js";
 
 // =======================================
 // Send Reset Password OTP
@@ -161,6 +162,13 @@ export const resetPassword = async (
       return res.status(400).json({
         success: false,
         message: "OTP Verification Required",
+      });
+    }
+
+    if (isDemoAccount(email)) {
+      return res.status(403).json({
+        success: false,
+        message: DEMO_LOCKED_MESSAGE,
       });
     }
 

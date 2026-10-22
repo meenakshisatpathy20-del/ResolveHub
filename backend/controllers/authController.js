@@ -5,6 +5,7 @@ import User from "../models/User.js";
 import OTP from "../models/OTP.js";
 import generateToken from "../utils/generateToken.js";
 import serializeUser from "../utils/serializeUser.js";
+import { isDemoAccount, DEMO_LOCKED_MESSAGE } from "../utils/demoAccounts.js";
 
 const fail = (res, status, message) =>
   res.status(status).json({ success: false, message });
@@ -185,6 +186,10 @@ export const updateProfile = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+
+    if (isDemoAccount(req.user.email)) {
+      return fail(res, 403, DEMO_LOCKED_MESSAGE);
+    }
 
     if (!newPassword || newPassword.length < 8) {
       return fail(res, 400, "New password must be at least 8 characters.");

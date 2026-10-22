@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import AuthLayout from "./AuthLayout";
 import GoogleSignIn from "./GoogleSignIn";
+import DemoLogin from "./DemoLogin";
 import PasswordInput from "../../components/common/PasswordInput";
 import { Spinner } from "../../components/common/States";
 import API, { errorMessage } from "../../services/api";
@@ -34,21 +35,25 @@ function Login() {
     setError("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const loginWith = async (email, password) => {
     setLoading(true);
     setError("");
 
     try {
-      const res = await API.post("/auth/login", form);
+      const res = await API.post("/auth/login", { email, password });
       login(res.data.user, res.data.token);
-      toast.success(`Welcome back, ${res.data.user.fullName.split(" ")[0]}!`);
+      toast.success(`Welcome, ${res.data.user.fullName.split(" ")[0]}!`);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(errorMessage(err, "Login failed."));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    loginWith(form.email, form.password);
   };
 
   return (
@@ -64,6 +69,8 @@ function Login() {
         </>
       }
     >
+      <DemoLogin onLogin={loginWith} disabled={loading} />
+
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         {error && (
           <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
