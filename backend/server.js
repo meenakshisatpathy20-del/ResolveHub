@@ -35,9 +35,22 @@ if (trustProxy > 0) {
 // Middleware
 // =============================
 
+// Accepts "https://site.com", "https://site.com/" or "https://site.com/login"
+// and keeps only the origin, so small CLIENT_URL typos don't break CORS.
+const toOrigin = (value) => {
+  try {
+    return new URL(value.trim()).origin;
+  } catch {
+    return value.trim().replace(/\/+$/, "");
+  }
+};
+
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
-  .map((origin) => origin.trim());
+  .filter((origin) => origin.trim())
+  .map(toOrigin);
+
+console.log(`🌐 Allowed frontend origin(s): ${allowedOrigins.join(", ")}`);
 
 app.use(helmet());
 
