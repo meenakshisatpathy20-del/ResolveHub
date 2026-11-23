@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// In production builds the API defaults to "/api" on the same domain;
+// vercel.json forwards /api/* to the backend, so no CORS or env var is needed.
 export const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "/api" : "http://localhost:5000/api");
 
 const API = axios.create({
   baseURL: API_URL,

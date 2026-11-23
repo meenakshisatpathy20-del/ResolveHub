@@ -1,4 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://resolvehub-api-a9fhc4bgg5dbakf9.koreacentral-01.azurewebsites.net/api/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
